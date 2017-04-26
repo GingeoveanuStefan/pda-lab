@@ -22,12 +22,12 @@ int main() {
     float *h_A;
     float *d_A;
     int i, j;
-    size_t sizeN;
+    size_t sizeA;
 
     fscanf(file, "%d%", &N);
-    sizeN = N * sizeof(float);
+    sizeA = N * N * sizeof(float);
 
-    float* h_A = (float*)malloc(sizeN*sizeN);
+    h_A = (float*)malloc(sizeA);
 
     // INPUT MATRIX
     for(i=0 ;i<M; i++) {
@@ -38,15 +38,15 @@ int main() {
 
     fclose(file);
 
-    cudaMalloc(&d_A, sizeN*sizeN);
+    cudaMalloc(&d_A, sizeA);
 
-    cudaMemcpy(d_A, h_A, sizeN*sizeN, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_A, h_A, sizeA, cudaMemcpyHostToDevice);
 
     // Invoke kernel with N blocks and N threads per block
     Floyd<<<N, N>>>(d_A, N);
 
     // COPY RESULT TO HOST
-    cudaMemcpy(h_A, d_A, sizeN*sizeN, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_A, d_A, sizeA, cudaMemcpyDeviceToHost);
 
     cudaFree(d_A);
 

@@ -20,19 +20,19 @@ int main() {
     float *h_A, *h_B, *h_C;
     float *d_A, *d_B, *d_C;
     int i, j;
-    size_t sizeM, sizeN, sizeP;
+    size_t sizeA, sizeB, sizeC;
 
     fscanf(file, "%d%", &M);
     fscanf(file, "%d%", &N);
     fscanf(file, "%d%", &P);
 
-    sizeM = M * sizeof(float);
-    sizeN = N * sizeof(float);
-    sizeP = P * sizeof(float);
+    sizeA = M * N * sizeof(float);
+    sizeB = N * P * sizeof(float);
+    sizeC = M * P * sizeof(float);
 
-    float* h_A = (float*)malloc(sizeM*sizeN);
-    float* h_B = (float*)malloc(sizeN*sizeP);
-    float* h_C = (float*)malloc(sizeN*sizeP);
+    h_A = (float*)malloc(sizeA);
+    h_B = (float*)malloc(sizeB);
+    h_C = (float*)malloc(sizeC);
 
     // Read matrices
     for(i=0 ;i<M; i++) {    // A
@@ -48,18 +48,18 @@ int main() {
 
     fclose(file);
 
-    cudaMalloc(&d_A, sizeM*sizeN);
-    cudaMalloc(&d_B, sizeN*sizeP);
-    cudaMalloc(&d_C, sizeM*sizeP);
+    cudaMalloc(&d_A, sizeA);
+    cudaMalloc(&d_B, sizeB);
+    cudaMalloc(&d_C, sizeC);
 
-    cudaMemcpy(d_A, h_A, sizeM*sizeN, cudaMemcpyHostToDevice);
-    cudaMemcpy(d_B, h_B, sizeN*sizeP, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_A, h_A, sizeA, cudaMemcpyHostToDevice);
+    cudaMemcpy(d_B, h_B, sizeB, cudaMemcpyHostToDevice);
 
     // Invoke kernel with M blocks (one block per line) and P threads per block (one thread per element)
     MatrixMult<<<M, P>>>(d_A, d_B, d_C, N);
 
     // COPY RESULT TO HOST
-    cudaMemcpy(h_C, d_C, sizeM*sizeP, cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_C, d_C, sizeC, cudaMemcpyDeviceToHost);
 
     cudaFree(d_A);
     cudaFree(d_B);

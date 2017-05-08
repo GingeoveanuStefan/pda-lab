@@ -48,8 +48,8 @@ int main() {
 	dim3 dimGrid(numOfBlocks, numOfBlocks);
 	
     for(k=0; k<N; k++) {
-		Floyd <<<dimGrid, dimBlock>>>(d_A, N, k);
-	}
+	Floyd <<<dimGrid, dimBlock>>>(d_A, N, k);
+    }
 
     // COPY RESULT TO HOST
     cudaMemcpy(h_A, d_A, sizeA, cudaMemcpyDeviceToHost);
